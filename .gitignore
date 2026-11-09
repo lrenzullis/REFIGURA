@@ -1,0 +1,21 @@
+# Claves privadas
+.env
+.env.*
+!.env.example
+
+# Datos y resultados
+datos/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.json
+*.tmp
+
+# Entornos virtuales y cachés
+.venv/
+venv/
+__pycache__/
+*.py[cod]
