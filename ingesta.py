@@ -96,7 +96,10 @@ def _normalizar(item, video_id, padre):
         if not isinstance(cid, str) or not cid or any(c.isspace() for c in cid):
             raise ValueError("Comentario sin identificador válido.")
         if not isinstance(texto, str) or not texto.strip():
-            raise ValueError("Comentario sin texto válido.")
+            print("\nComentario sin texto válido:")
+            print("comment_id:", cid)
+            print("snippet completo:", sn)
+            print(json.dumps(item, ensure_ascii=False, indent=2))
         if sn.get("parentId") != padre or cid == padre:
             raise ValueError("La respuesta recibida no corresponde al comentario padre.")
         publicado, actualizado = sn["publishedAt"], sn.get("updatedAt")
@@ -147,6 +150,12 @@ def _guardar_pagina(conexion, estado, cursor, parametros, pagina, bruto):
                     raise ValueError("Un comentario recibido cambia de padre; la página no se ha guardado.")
                 continue
             if estado["limite"] is not None and cantidad >= estado["limite"]:
+                continue
+            if not comentario["text"].strip():
+                print(
+                    f"[AVISO] Comentario {comentario['comment_id']} ignorado: texto vacío "
+                    f"(publishedAt={comentario.get('publishedAt')})"
+                )
                 continue
             conexion.execute(
                 """INSERT INTO comentarios(video_id,comment_id,parent_id,text,published_at,updated_at,

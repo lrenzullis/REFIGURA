@@ -92,6 +92,8 @@ def ejecutar(args):
         raise ValueError("El identificador del vídeo debe tener 11 caracteres.")
     if type(args.lote) is not int or not 1 <= args.lote <= 100:
         raise ValueError("--lote debe estar entre 1 y 100.")
+    if args.limite is not None and (type(args.limite) is not int or args.limite < 1):
+        raise ValueError("--limite debe ser un entero mayor que 0.")
     if not args.obra.strip() or not args.modelo.strip():
         raise ValueError("Indica una obra y un modelo.")
     if args.estreno and date.fromisoformat(args.estreno).isoformat() != args.estreno:
@@ -114,9 +116,12 @@ def ejecutar(args):
             raise ValueError("La ingesta del vídeo debe estar completa antes de clasificar.")
         comentarios = [dict(fila) for fila in db.execute("""
             SELECT video_id, comment_id, parent_id, text, published_at, updated_at,
-                   like_count, reply_count
-            FROM comentarios WHERE video_id = ? ORDER BY position
-        """, (video,))]
+                like_count, reply_count
+            FROM comentarios
+            WHERE video_id = ?
+            ORDER BY position
+            LIMIT COALESCE(?, -1)
+        """, (video, args.limite))]
     if not comentarios:
         raise ValueError("No hay comentarios para clasificar.")
     for comentario in comentarios:
@@ -136,7 +141,7 @@ def ejecutar(args):
         raise ValueError("El archivo prompt.txt está vacío.")
     config = {
         "video_id": video, "obra": args.obra, "estreno": args.estreno,
-        "modelo": args.modelo, "lote": args.lote, "reasoning_effort": REASONING_EFFORT, "max_output_tokens": MAX_OUTPUT_TOKENS,
+        "modelo": args.modelo, "lote": args.lote, "limite": args.limite, "reasoning_effort": REASONING_EFFORT, "max_output_tokens": MAX_OUTPUT_TOKENS,
         "entrada_sha256": hashlib.sha256(contenido).hexdigest(),
         "prompt_sha256": hashlib.sha256(plantilla.encode("utf-8")).hexdigest(),
         "esquema_sha256": hashlib.sha256(json.dumps(ESQUEMA, sort_keys=True).encode("utf-8")).hexdigest(),

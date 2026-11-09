@@ -37,6 +37,7 @@ def main():
     p.add_argument("--estreno", help="Fecha YYYY-MM-DD, si se conoce")
     p.add_argument("--modelo", default="gpt-6-luna")
     p.add_argument("--lote", type=int, default=20)
+    p.add_argument("--limite",  type=int, default=None, help="Máximo de comentarios que se clasificarán")
     p.add_argument("--salida", type=Path)
     p.add_argument("--reanudar", action="store_true")
 
