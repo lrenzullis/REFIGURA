@@ -181,8 +181,16 @@ def _guardar_pagina(conexion, estado, cursor, parametros, pagina, bruto):
 
 def ejecutar(args):
     ruta = Path(args.salida)
+
+    aliases_path = Path(__file__).with_name("videos.json")
+    if aliases_path.exists():
+        aliases = json.loads(aliases_path.read_text(encoding="utf-8"))
+        args.video_id = aliases.get(args.video_id, args.video_id)
+
     if not re.fullmatch(r"[A-Za-z0-9_-]{11}", args.video_id):
-        raise ValueError("El identificador del vídeo debe tener 11 caracteres.")
+        raise ValueError(
+            "El valor indicado no es un video_id válido ni un alias definido en videos.json."
+        )
     if args.limite is not None and (type(args.limite) is not int or args.limite <= 0):
         raise ValueError("El límite debe ser positivo; omítelo para descargar todos.")
     if args.reanudar and not ruta.exists():
