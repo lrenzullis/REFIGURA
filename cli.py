@@ -35,6 +35,8 @@ def main():
     p.add_argument("--video-id", required=True, help="Vídeo guardado que se quiere clasificar")
     p.add_argument("--obra", required=True)
     p.add_argument("--estreno", help="Fecha YYYY-MM-DD, si se conoce")
+    p.add_argument("--desde-fecha", help="Clasificar comentarios desde esta fecha inclusive (YYYY-MM-DD)")
+    p.add_argument("--hasta-fecha", help="Clasificar comentarios hasta esta fecha inclusive (YYYY-MM-DD)")
     p.add_argument("--modelo", default="gpt-6-luna")
     p.add_argument("--lote", type=int, default=20)
     p.add_argument("--limite",  type=int, default=None, help="Máximo de comentarios que se clasificarán")

@@ -98,6 +98,20 @@ def ejecutar(args):
         raise ValueError("Indica una obra y un modelo.")
     if args.estreno and date.fromisoformat(args.estreno).isoformat() != args.estreno:
         raise ValueError("--estreno debe usar YYYY-MM-DD.")
+    for nombre, valor in (
+        ("--desde-fecha", args.desde_fecha),
+        ("--hasta-fecha", args.hasta_fecha),
+    ):
+        if valor and date.fromisoformat(valor).isoformat() != valor:
+            raise ValueError(f"{nombre} debe usar YYYY-MM-DD.")
+
+    if (
+        args.desde_fecha
+        and args.hasta_fecha
+        and args.desde_fecha > args.hasta_fecha
+    ):
+        raise ValueError("--desde-fecha no puede ser posterior a --hasta-fecha.")
+    
     lectura = {"object_pairs_hook": _sin_duplicados, "parse_constant": _sin_duplicados}
     # La lectura es consistente y sólo permite leer; una ruta errónea no crea otra base.
     with closing(sqlite3.connect(entrada.as_uri() + "?mode=ro", uri=True, timeout=30)) as db:
@@ -119,9 +133,16 @@ def ejecutar(args):
                 like_count, reply_count
             FROM comentarios
             WHERE video_id = ?
+                AND (? IS NULL OR substr(published_at, 1, 10) >= ?)
+                AND (? IS NULL OR substr(published_at, 1, 10) <= ?)
             ORDER BY position
             LIMIT COALESCE(?, -1)
-        """, (video, args.limite))]
+        """, (
+            video,
+            args.desde_fecha, args.desde_fecha,
+            args.hasta_fecha, args.hasta_fecha,
+            args.limite,
+        ))]
     if not comentarios:
         raise ValueError("No hay comentarios para clasificar.")
     for comentario in comentarios:
@@ -143,6 +164,8 @@ def ejecutar(args):
         "video_id": video, "obra": args.obra, "estreno": args.estreno,
         "modelo": args.modelo, "lote": args.lote, "limite": args.limite, "reasoning_effort": REASONING_EFFORT, "max_output_tokens": MAX_OUTPUT_TOKENS,
         "entrada_sha256": hashlib.sha256(contenido).hexdigest(),
+        "desde_fecha": args.desde_fecha,
+        "hasta_fecha": args.hasta_fecha,
         "prompt_sha256": hashlib.sha256(plantilla.encode("utf-8")).hexdigest(),
         "esquema_sha256": hashlib.sha256(json.dumps(ESQUEMA, sort_keys=True).encode("utf-8")).hexdigest(),
     }
