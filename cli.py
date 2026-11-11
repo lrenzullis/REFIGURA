@@ -32,7 +32,7 @@ def main():
     p.add_argument("--db", "--entrada", dest="entrada", type=Path,
                    default=Path("datos/audiovisuales.sqlite"),
                    help="Base SQLite; por defecto datos/audiovisuales.sqlite")
-    p.add_argument("--video-id", required=True, help="Vídeo guardado que se quiere clasificar")
+    p.add_argument("--video-id", required=True, help="ID de YouTube o alias definido en videos.json")
     p.add_argument("--obra", required=True)
     p.add_argument("--estreno", help="Fecha YYYY-MM-DD, si se conoce")
     p.add_argument("--desde-fecha", help="Clasificar comentarios desde esta fecha inclusive (YYYY-MM-DD)")

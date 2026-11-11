@@ -84,12 +84,19 @@ def _validar(datos, ids):
 
 
 def ejecutar(args):
+
+    aliases_path = Path(__file__).with_name("videos.json")
+    if aliases_path.exists():
+        aliases = json.loads(aliases_path.read_text(encoding="utf-8"))
+        args.video_id = aliases.get(args.video_id, args.video_id)
+
+    
     entrada, salida = Path(args.entrada).resolve(), Path(args.salida).resolve()
     if entrada == salida:
         raise ValueError("La salida debe ser diferente de la base de datos.")
     video = args.video_id
     if not isinstance(video, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video):
-        raise ValueError("El identificador del vídeo debe tener 11 caracteres.")
+        raise ValueError("El valor indicado no es un video_id válido ni un alias definido en videos.json.")
     if type(args.lote) is not int or not 1 <= args.lote <= 100:
         raise ValueError("--lote debe estar entre 1 y 100.")
     if args.limite is not None and (type(args.limite) is not int or args.limite < 1):
